@@ -5,7 +5,7 @@ from aiogram.types import CallbackQuery
 from aiogram.fsm.state import State
 
 from aiogram_dialog import DialogManager
-from aiogram_dialog.api.entities import Data
+from aiogram_dialog.api.entities import Data, ShowMode, StartMode
 from aiogram_dialog.widgets.common import WhenCondition
 from aiogram_dialog.widgets.kbd.state import (
     EventProcessorButton,
@@ -29,6 +29,7 @@ class TabState(EventProcessorButton):
         default_state: Optional[State] = None,
         check_state_mode: CheckStateMode = CheckStateMode.STATE,
         on_click: Optional[OnClick] = None,
+        show_mode: Optional[ShowMode] = None,
         when: WhenCondition = None,
     ) -> None:
         text = Case(
@@ -40,12 +41,13 @@ class TabState(EventProcessorButton):
         )
         super().__init__(
             text=text,
+            on_click=self._on_click,
             id=id,
-            on_click=on_click,
             when=when,
         )
         self.user_on_click = on_click
         self.state = state
+        self.show_mode = show_mode
         self.check_state_mode = check_state_mode
         self.default_state = default_state
 
@@ -76,11 +78,15 @@ class TabSwitchTo(TabState):
     ) -> None:
         if self.user_on_click:
             await self.user_on_click(callback, self, manager)
+
         if self.default_state:
             if self.state == manager.current_context().state:
                 return await manager.switch_to(self.default_state)
 
-        await manager.switch_to(self.state)
+        await manager.switch_to(
+            state=self.state,
+            show_mode=self.show_mode
+        )
 
 
 class TabStart(TabState):
@@ -94,6 +100,7 @@ class TabStart(TabState):
         check_state_mode: CheckStateMode = CheckStateMode.STATE,
         default_state: Optional[State] = None,
         on_click: Optional[OnClick] = None,
+        mode: StartMode = StartMode.NORMAL,
         when: WhenCondition = None,
     ) -> None:
         super().__init__(
@@ -106,18 +113,26 @@ class TabStart(TabState):
             on_click=on_click,
             when=when
         )
-        self.data = data
+        self.start_data = data
+        self.mode = mode
 
     async def _on_click(
         self,
         callback: CallbackQuery,
         button: Button,
         manager: DialogManager,
-    ) -> None:
+    ):
+
         if self.user_on_click:
             await self.user_on_click(callback, self, manager)
+
         if self.default_state:
             if self.state == manager.current_context().state:
-                return await manager.start(self.default_state)
+                return await manager.start(state=self.default_state, data=self.data)
 
-        await manager.start(self.state)
+        await manager.start(
+            state=self.state,
+            data=self.start_data,
+            mode=self.mode,
+            show_mode=self.show_mode,
+        )
