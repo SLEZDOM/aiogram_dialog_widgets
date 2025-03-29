@@ -28,11 +28,14 @@ class KeyboardGrid(Keyboard):
         data: dict,
         manager: DialogManager,
     ) -> RawKeyboard:
-        kbd = []
+        kbd: RawKeyboard = []
 
         for button in self.buttons:
             b_kbd = await button.render_keyboard(data, manager)
             if isinstance(b_kbd, Iterable):
                 kbd.append(list(chain(*b_kbd)))
     
-        return [list(row) for row in zip_longest(*kbd, fillvalue=empty_button())]
+        return [
+            list(row)
+            for row in zip_longest(*kbd, fillvalue=empty_button())
+        ]

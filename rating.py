@@ -43,9 +43,9 @@ class Rating(Keyboard, Generic[T]):
         value: int
     ) -> None:
         if 0 <= value <= self.max_value:
-            currentRating: int = self.get_value(manager)
+            current_rating: int = self.get_value(manager)
 
-            if value == currentRating:
+            if value == current_rating:
                 return await self.reset_value(manager)
 
             self.set_widget_data(manager, value)
@@ -82,21 +82,21 @@ class Rating(Keyboard, Generic[T]):
         manager: DialogManager,
     ) -> RawKeyboard:
         buttons = []
-        currentRating: int = self.get_value(manager)
+        current_rating: int = self.get_value(manager)
 
         for index, _ in enumerate(range(self.max_value)):
-            normalIndexValue: int = index + 1
+            normal_index_value: int = index + 1
 
-            isFilled: bool = normalIndexValue <= currentRating
+            is_filled: bool = normal_index_value <= current_rating
 
-            if isFilled:
+            if is_filled:
                 text = await self.checked_text.render_text(data, manager)
             else:
                 text = await self.unchecked_text.render_text(data, manager)
 
             buttons.append(InlineKeyboardButton(
                 text=text,
-                callback_data=self._item_callback_data(normalIndexValue),
+                callback_data=self._item_callback_data(normal_index_value),
             ))
 
         return [buttons]
