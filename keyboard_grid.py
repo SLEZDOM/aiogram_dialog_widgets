@@ -2,9 +2,9 @@ from collections.abc import Iterable
 from itertools import chain, zip_longest
 from typing import Optional
 
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import CallbackQuery, InlineKeyboardButton
 from aiogram_dialog.api.internal import RawKeyboard
-from aiogram_dialog.api.protocols import DialogManager
+from aiogram_dialog.api.protocols import DialogManager, DialogProtocol
 from aiogram_dialog.widgets.common import WhenCondition
 from aiogram_dialog.widgets.kbd.base import Keyboard
 
@@ -39,3 +39,15 @@ class KeyboardGrid(Keyboard):
             list(row)
             for row in zip_longest(*kbd, fillvalue=empty_button())
         ]
+
+    async def _process_other_callback(
+        self,
+        callback: CallbackQuery,
+        dialog: DialogProtocol,
+        manager: DialogManager,
+    ) -> bool:
+        for b in self.buttons:
+            if await b.process_callback(callback, dialog, manager):
+                return True
+
+        return False
