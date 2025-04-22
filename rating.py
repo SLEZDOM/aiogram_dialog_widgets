@@ -1,4 +1,4 @@
-from typing import Callable, Generic, Union
+from typing import Callable, Generic, TypedDict, Union
 
 from aiogram.types import CallbackQuery, InlineKeyboardButton
 from aiogram_dialog import DialogManager, DialogProtocol
@@ -11,6 +11,11 @@ from aiogram_dialog.widgets.widget_event import (
     ensure_event_processor,
     WidgetEventProcessor
 )
+
+
+class RatingRateData(TypedDict):
+    data: dict
+    rate: int
 
 
 class Rating(Keyboard, Generic[T]):
@@ -73,8 +78,18 @@ class Rating(Keyboard, Generic[T]):
             manager,
             value
         )
-        
+
         return True
+
+    async def _prepare_rate_data(
+        self,
+        data: dict,
+        rate: int,
+    ) -> RatingRateData:
+        return {
+            "data": data,
+            "rate": rate,
+        }
 
     async def _render_keyboard(
         self,
@@ -89,10 +104,15 @@ class Rating(Keyboard, Generic[T]):
 
             is_filled: bool = normal_index_value <= current_rating
 
+            button_data: RatingRateData = await self._prepare_rate_data(
+                data=data,
+                rate=normal_index_value,
+            )
+
             if is_filled:
-                text = await self.checked_text.render_text(data, manager)
+                text = await self.checked_text.render_text(button_data, manager)
             else:
-                text = await self.unchecked_text.render_text(data, manager)
+                text = await self.unchecked_text.render_text(button_data, manager)
 
             buttons.append(InlineKeyboardButton(
                 text=text,
