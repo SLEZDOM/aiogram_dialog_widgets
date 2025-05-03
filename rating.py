@@ -6,11 +6,17 @@ from aiogram_dialog.widgets.common import ManagedWidget
 from aiogram_dialog.widgets.kbd.base import Keyboard
 from aiogram_dialog.widgets.kbd.select import T, OnItemClick
 from aiogram_dialog.api.internal import RawKeyboard
-from aiogram_dialog.widgets.text import Text
+from aiogram_dialog.widgets.text import Text, Format
 from aiogram_dialog.widgets.widget_event import (
     ensure_event_processor,
     WidgetEventProcessor
 )
+
+
+DEFAULT_RATING_ID = "__rating__"
+
+DEFAULT_RATING_TEXT = Format("{rate}")
+DEFAULT_SELECTED_RATING_TEXT = Format("[{rate}]")
 
 
 class RatingRateData(TypedDict):
@@ -21,9 +27,9 @@ class RatingRateData(TypedDict):
 class Rating(Keyboard, Generic[T]):
     def __init__(
         self,
-        checked_text: Text,
-        unchecked_text: Text,
-        id: str,
+        checked_text: Text = DEFAULT_SELECTED_RATING_TEXT,
+        unchecked_text: Text = DEFAULT_RATING_TEXT,
+        id: str = DEFAULT_RATING_ID,
         default: int = 0,
         max_value: int = 5,
         on_click: Union[
