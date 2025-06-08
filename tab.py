@@ -121,14 +121,17 @@ class TabStart(TabState):
         callback: CallbackQuery,
         button: Button,
         manager: DialogManager,
-    ):
+    ) -> None:
 
         if self.user_on_click:
             await self.user_on_click(callback, self, manager)
 
         if self.default_state:
             if self.state == manager.current_context().state:
-                return await manager.start(state=self.default_state, data=self.data)
+                return await manager.start(
+                    state=self.default_state,
+                    data=self.start_data
+                )
 
         await manager.start(
             state=self.state,
